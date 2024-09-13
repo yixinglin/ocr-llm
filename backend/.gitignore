@@ -1,0 +1,7 @@
+.idea
+conf
+ssh
+temp
+test
+scripts
+*.pyc
