@@ -1,7 +1,6 @@
 import sys
 from typing import Tuple, List
 import cv2
-import easyocr
 import numpy as np
 import pytesseract
 from PIL import Image, ImageFont, ImageDraw
@@ -68,7 +67,7 @@ class OCRUtils:
             plt.show()
         return image_with_text
 
-    def preprocess_image(self, image_path):
+    def preprocess_image(self, image_path, thresh_val=127):
         """
         对图像进行预处理，返回处理后的二值化图像。
 
@@ -87,38 +86,40 @@ class OCRUtils:
         # 使用高斯模糊去除噪声
         blurred = cv2.GaussianBlur(gray, (5, 5), 0)
 
-        # 二值化处理，使用 Otsu's 阈值法自动选择阈值
-        _, binary_image = cv2.threshold(blurred, 0, 255, cv2.THRESH_BINARY + cv2.THRESH_OTSU)
+        # 二值化处理
+        _, binary_image =cv2.threshold(blurred, thresh_val, 255, cv2.THRESH_BINARY)
 
         # 可选步骤：进行形态学操作，如膨胀和腐蚀，进一步消除噪声
         # kernel = np.ones((3, 3), np.uint8)
         # binary_image = cv2.morphologyEx(binary_image, cv2.MORPH_CLOSE, kernel)
 
         # 如果图片方向不正，可以尝试自动旋转校正（可选）
-        edges = cv2.Canny(binary_image, 50, 150)
-        lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=50, maxLineGap=5)
-        if lines is not None:
-            angles = []
-            for line in lines:
-                x1, y1, x2, y2 = line[0]
-                angle = np.arctan2(y2 - y1, x2 - x1)
-                angles.append(angle)
-            median_angle = np.median(angles)
-            angle_degree = np.degrees(median_angle)
-
-            # 旋转图片
-            (h, w) = binary_image.shape[:2]
-            center = (w // 2, h // 2)
-            M = cv2.getRotationMatrix2D(center, angle_degree, 1.0)
-            binary_image = cv2.warpAffine(binary_image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
-
+        # edges = cv2.Canny(binary_image, 50, 150)
+        # lines = cv2.HoughLinesP(edges, 1, np.pi / 180, threshold=100, minLineLength=50, maxLineGap=5)
+        # if lines is not None:
+        #     angles = []
+        #     for line in lines:
+        #         x1, y1, x2, y2 = line[0]
+        #         angle = np.arctan2(y2 - y1, x2 - x1)
+        #         angles.append(angle)
+        #     median_angle = np.median(angles)
+        #     angle_degree = np.degrees(median_angle)
+        #
+        #     # 旋转图片
+        #     (h, w) = binary_image.shape[:2]
+        #     center = (w // 2, h // 2)
+        #     M = cv2.getRotationMatrix2D(center, angle_degree, 1.0)
+        #     binary_image = cv2.warpAffine(binary_image, M, (w, h), flags=cv2.INTER_CUBIC, borderMode=cv2.BORDER_REPLICATE)
         return binary_image
 
 
 # pip install pytesseract
 class TesseractOCR(OCRUtils):
-    def __init__(self, image_path, lang="deu", preprocessed=False, *args, **kwargs):
+    def __init__(self, image_path, lang="deu", preprocessed=False, thresh_val=127, *args, **kwargs):
         super().__init__(image_path, lang, preprocessed, name="Tesseract", *args, **kwargs)
+        self.conf = '--psm 6 --oem 1'
+        self.image = None
+        self.thresh_val = thresh_val
 
     def to_data(self) -> List[OCR_Annotation]:
         """
@@ -128,10 +129,10 @@ class TesseractOCR(OCRUtils):
         if not self.preprocessed:
             image = cv2.imread(self.image_path)
         else:
-            preprocessed_image = self.preprocess_image(self.image_path)
+            preprocessed_image = self.preprocess_image(self.image_path, self.thresh_val)
             image = preprocessed_image
 
-        raw_data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT)
+        raw_data = pytesseract.image_to_data(image, output_type=pytesseract.Output.DICT, config=self.conf)
         data = []
         for i in range(len(raw_data['text'])):
             confidence = round(float(raw_data['conf'][i]))
@@ -142,6 +143,7 @@ class TesseractOCR(OCRUtils):
                     bbox=(raw_data['left'][i], raw_data['top'][i], raw_data['width'][i], raw_data['height'][i]),
                     confidence=int(confidence),
                     ))
+        self.image = image
         return data
 
     def to_plain_text(self) -> str:
@@ -152,9 +154,10 @@ class TesseractOCR(OCRUtils):
         if not self.preprocessed:
             image = cv2.imread(self.image_path)
         else:
-            preprocessed_image = self.preprocess_image(self.image_path)
+            preprocessed_image = self.preprocess_image(self.image_path, self.thresh_val)
             image = preprocessed_image
-        text = pytesseract.image_to_string(image, lang=self.lang)
+        text = pytesseract.image_to_string(image, lang=self.lang, config=self.conf)
+        self.image = image
         return text
 
     def __str__(self):
@@ -206,7 +209,7 @@ def test_pytesseract():
     if not preprocessed:
         image = cv2.imread(image_path)
     else:
-        image = ocr.preprocess_image(image_path)
+        image = ocr.preprocess_image(image_path, thresh_val=127)
 
     # Show preprocessed image
     plt.imshow(image, cmap='gray')
@@ -239,5 +242,5 @@ def test_easyocr():
 
 
 if __name__ == "__main__":
-    # test_pytesseract()
-    test_easyocr()
+    test_pytesseract()
+    # test_easyocr()

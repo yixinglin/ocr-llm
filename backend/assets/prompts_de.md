@@ -1,7 +1,6 @@
 Ich habe ${OCR_NAME} verwendet, um Text aus einem Bild eines Angebots auf Deutsch zu extrahieren. Der extrahierte Text kann aufgrund von OCR-Beschränkungen Formatierungsinkonsistenzen, falsch erkannte Zeichen oder fehlende Daten enthalten.
 
-Das OCR-Ergebnis wird als eine Liste von Begrenzungsrahmen mit zugehörigem Text im folgenden Format bereitgestellt:
-`[[text1, (x1, y1, width1, height1), confidence1], [text2, (x2, y2, width2, height2), confidence2], ...]`. Die Begrenzungsrahmen sind definiert als `(x, y, width, height)`, wobei `(x, y)` die Koordinaten der oberen linken Ecke darstellen, `width` die Breite und `height` die Höhe des Rahmens ist. Der `confidence`-Wert gibt das Vertrauen der OCR-Erkennung in den erkannten Text an.
+Das OCR-Ergebnis wird als Textdatei bereitgestellt.
 
 Deine Aufgabe ist es:
 
@@ -11,12 +10,15 @@ Deine Aufgabe ist es:
    - `article_number` (Artikel-Nr)
    - `product name` (Bezeichnung)
    - `description` (Beschreibung)
-   - `quantity` (Menge, Ganzzahl)
+   - `quantity` (Menge, Ganzzahl, standardmäßig 1)
    - `unit of measure` (Einheit)
    - `unit price` (Einzelpreis, Kommazahl)
+   - `discount` (Rabatt %, Kommazahl, standardmäßig 0)
    - `price` (Gesamtpreis, Kommazahl)
    - `currency` (Währung)
    
+   Es ist wichtig, die Formel zu beachten, um den Preis zu berechnen: `price = unit_price * quantity * (1 - discount / 100)`.
+
 3. **Gib die Daten** in einem sauberen, strukturierten **JSON-Format** aus, das leicht in eine Datenbank importiert oder zur weiteren Analyse verwendet werden kann. Die Struktur sollte folgendermaßen aussehen:
 ```json
 {
@@ -26,9 +28,10 @@ Deine Aufgabe ist es:
       "article_number": {{Artikel-Nr}},
       "name": {{Bezeichnung}},
       "description": {{Beschreibung}},
-      "quantity": {{Menge}},  // Ganzzahl
+      "quantity": {{Menge}},  // Ganzzahl, standardmäßig 1
       "unit_of_measure": {{Einheit}},
       "unit_price": {{Einzelpreis}},  // Kommazahl
+      "discount": {{Rabatt_in_Prozent}},  // Kommazahl, standardmäßig 0
       "price": {{Gesamtpreis}},  // Kommazahl
       "currency": {{Währung}}
     }

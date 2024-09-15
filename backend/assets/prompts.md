@@ -46,7 +46,7 @@ you just need to return the structured JSON output as described.
 
 OCR Output:
 
-```
+```text
 ${OCR_OUTPUT}
 ```
 

@@ -1,0 +1,15 @@
+version: '3'
+
+services:
+  ocrllm-api:
+    build: .
+    image: yixing/ocrllm-api
+    container_name: ocrllm-api
+    network_mode: host
+    restart: on-failure:5
+    volumes:
+      - ./temp:/code/temp
+      - ./conf:/code/conf
+      - ./assets:/code/assets
+    environment:
+      - CONFIG_FILE=conf/config.yaml
