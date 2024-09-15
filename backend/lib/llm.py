@@ -48,11 +48,11 @@ class GPTModel(LargeLanguageModel):
         }
         ans = completion.choices[0].message.content
         return {
-            "answer": ans,
             "model": self.model,
             "temperature": self.temperature,
             "sys_prompt": self.sys_prompt,
             "usage": usage,
+            "answer": ans,
         }
 
     def __str__(self):

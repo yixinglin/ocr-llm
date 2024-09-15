@@ -12,4 +12,4 @@ services:
       - ./conf:/code/conf
       - ./assets:/code/assets
     environment:
-      - CONFIG_FILE=conf/config.yaml
+      - CONFIG_FILE=conf/config-prod.yaml

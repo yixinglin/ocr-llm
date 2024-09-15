@@ -7,6 +7,8 @@ from PIL import Image, ImageFont, ImageDraw
 from matplotlib import pyplot as plt
 from pydantic import BaseModel
 
+from core.logs import logger
+
 if sys.platform == "win32":
     # Arial
     FONT_PATH = "C:/Windows/Fonts/Arial.ttf"
@@ -120,6 +122,8 @@ class TesseractOCR(OCRUtils):
         self.conf = '--psm 6 --oem 1'
         self.image = None
         self.thresh_val = thresh_val
+        logger.info(f"Using Tesseract OCR with language={lang}, preprocessed={preprocessed}, and thresh_val={thresh_val}")
+        logger.info(f"Image path: {image_path}")
 
     def to_data(self) -> List[OCR_Annotation]:
         """
