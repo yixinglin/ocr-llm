@@ -8,7 +8,9 @@ RUN apt-get install libgl1-mesa-glx -y
 RUN apt-get install -y tesseract-ocr tesseract-ocr-deu tesseract-ocr-chi-sim tesseract-ocr-chi-tra
 
 RUN pip3 install --upgrade pip
-RUN pip3 install --no-cache-dir -r requirements.txt
+# RUN pip3 install --no-cache-dir -r requirements.txt
+RUN pip3 install --no-cache-dir -r requirements-imsearch.txt
+RUN pip3 install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 
 EXPOSE 6995
 

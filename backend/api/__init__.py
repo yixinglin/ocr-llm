@@ -1,7 +1,9 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import config
+from core.db import init_db_sqlite
 from core.logs import logger
+from schedule import hourlyScheduler
 from .routes import v1_router
 
 app = FastAPI(
@@ -28,11 +30,27 @@ app.add_middleware(
 
 app.include_router(v1_router)
 
+init_db_sqlite(app)
+
+# T_BizProduct.create(
+#     create_by="admin",
+#     name="Sample Product",
+#     article_number="SP12345",
+#     price_clsa=100.00,
+#     price_clsb=120.00,
+#     min_quantity=1,
+#     seq_no=10
+# )
+#
+
+
 @app.on_event("startup")
 def app_start():
     print("FastAPI app started_")
     logger.info("FastAPI app started")
     logger.info(config)
+    hourlyScheduler.start()
+    logger.info("Scheduler started")
 
 @app.on_event("shutdown")
 def app_stop():

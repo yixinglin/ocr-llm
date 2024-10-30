@@ -11,5 +11,6 @@ services:
       - ./temp:/code/temp
       - ./conf:/code/conf
       - ./assets:/code/assets
+      - ./db:/code/db
     environment:
       - CONFIG_FILE=conf/config-prod.yaml

@@ -31,6 +31,11 @@ class MongoDBConfig:
     port: int
 
 @dataclass
+class VipServiceConfig:
+    root: str
+    domain: str
+
+@dataclass
 class Config:
     debug: bool
     env: str
@@ -46,6 +51,7 @@ class Config:
     logging: Logging
     file: FileConfig
     mongodb: MongoDBConfig
+    vip_service: VipServiceConfig
 
 
 
@@ -66,12 +72,14 @@ def load_config(config_path: str) -> Config:
         openai=OpenAiConfig(**config_dict['openai']),
         logging=Logging(**config_dict['logging']),
         file=FileConfig(**config_dict['file']),
-        mongodb=MongoDBConfig(**config_dict['mongodb'])
+        mongodb=MongoDBConfig(**config_dict['mongodb']),
+        vip_service=VipServiceConfig(**config_dict['vip_service'])
     )
 
     os.makedirs(c.logging.path, exist_ok=True)
     os.makedirs(c.file.quote_path, exist_ok=True)
     os.makedirs(c.file.image_path, exist_ok=True)
+    os.makedirs(c.vip_service.root, exist_ok=True)
     return c
 
 from dotenv import load_dotenv

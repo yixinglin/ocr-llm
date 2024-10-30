@@ -1,0 +1,1 @@
+from .hsms_vip import T_BizProduct

@@ -22,4 +22,7 @@ pip install fastapi
 
 
 docker run --name mongodb -p 27017:27017 -d mongodb/mongodb-community-server:latest
+
+
+pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cpu
 ```
