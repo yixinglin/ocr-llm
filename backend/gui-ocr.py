@@ -13,6 +13,8 @@ with open("conf/gui.json", 'r', encoding='utf-8') as f:
     PASSWD = conf['password']
     USERNAME = conf['username']
 
+print("API Domain:", DOMAIN)
+
 def recognize_text(image):
 
     # 使用 Tesseract 从图片中提取文本

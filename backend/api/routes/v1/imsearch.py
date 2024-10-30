@@ -1,12 +1,20 @@
 import asyncio
 from io import BytesIO
 from PIL import Image
-from fastapi import APIRouter, UploadFile, HTTPException
+from fastapi import APIRouter, UploadFile, HTTPException, Body
+from pydantic import Field, BaseModel
 
 from schemas.basic import ResponseSuccess
 from services.hsms_vip import VipProductSearchService
+from utils import ioutils
 
 imsearch_router = APIRouter(prefix="/imsearch")
+
+class Base64Image(BaseModel):
+    base64_image: str  # base64 encoded image data
+    format: str = Field(default="JPG",
+                        description="Image format (e.g. jpg, png, etc.)")  # image format (e.g. jpg, png, etc.)
+
 
 def search_images_by_image(image: bytes, k):
     pil_image = Image.open(BytesIO(image))
@@ -27,4 +35,11 @@ def search_images_by_upload(image: UploadFile):
     except (RuntimeError, TypeError) as e:
         raise HTTPException(status_code=500, detail=str(e))
 
-
+@imsearch_router.post("/base64/")
+def search_images_by_base64(body: Base64Image = Body(None, description="Base64 encoded image data")):
+    try:
+        im_data = ioutils.base64_decode(body.base64_image)
+        result = search_images_by_image(im_data, k=8)
+        return result
+    except (RuntimeError, TypeError) as e:
+        raise HTTPException(status_code=500, detail=str(e))

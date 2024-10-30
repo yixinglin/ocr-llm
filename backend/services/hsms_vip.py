@@ -14,11 +14,13 @@ from utils.http import encode_url
 from utils.imutils import faiss_search
 from utils.ioutils import file_to_md5
 from core.config import config
+from core.logs import logger
 
 vip_service_config = config.vip_service
 
 DOMAIN = vip_service_config.domain  # 下载图片的站点域名
 VIP_ROOT = vip_service_config.root       # VIP图片下载目录
+
 
 class VipProductSearchService:
     def __init__(self):
@@ -55,10 +57,10 @@ class VipProductSearchService:
         for item in image_list:
             image_path = f"{self.image_dir}/{item['md5']}.jpg"
             if os.path.exists(image_path):
-                print(f"{image_path} exists, skip")
+                logger.info(f"{image_path} exists, skip")
                 continue
             image_url = item['image_url']
-            print(image_url)
+            logger.info(image_url)
             async with aiohttp.ClientSession() as session:
                 async with session.get(image_url) as response:
                     if response.status == 200:
@@ -78,11 +80,11 @@ class VipProductSearchService:
     def __get_feature_extractor(self):
         cp_path = f'{self.checkpoint_dir}/resnet50-0676ba61.pth'
         if not os.path.exists(cp_path):
-            print(f"Downloading checkpoint from {self.checkpoint_down_url}")
+            logger.info(f"Downloading checkpoint from {self.checkpoint_down_url}")
             resp = requests.get(self.checkpoint_down_url, allow_redirects=True)
             with open(cp_path, 'wb') as f:
                 f.write(resp.content)
-            print(f"Checkpoint downloaded to {cp_path}")
+            logger.info(f"Checkpoint downloaded to {cp_path}")
         fe = FeatureExtractor.from_checkpoint(cp_path)
         return fe
 
@@ -93,14 +95,14 @@ class VipProductSearchService:
             image_path = f"{self.image_dir}/{row['md5']}.jpg"
             feature_path = f"{self.feature_dir}/{row['md5']}.npy"
             if os.path.exists(feature_path):
-                print(f"{feature_path} exists, skip")
+                logger.info(f"{feature_path} exists, skip")
                 continue
             img = Image.open(image_path).convert('RGB')
             features = fe.extract(img)
             with open(feature_path, "wb") as f:
                 np.save(f, features)
-                print(f"Features (i) saved for {image_path}")
-        print("All features extracted")
+                logger.info(f"Features (i) saved for {image_path}")
+        logger.info("All features extracted")
 
 
     def search_products_by_image(self, image: ImageFile, k=5):
