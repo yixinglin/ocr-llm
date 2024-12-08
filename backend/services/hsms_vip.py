@@ -51,8 +51,8 @@ class VipProductSearchService:
                     image_list.append(item)
 
         df = pd.DataFrame(image_list)
-        csv_path = f"{VIP_ROOT}/product_images.csv"
-        df.to_csv(csv_path, index=False)
+
+        df.to_csv(self.csv_path, index=False)
 
         for item in image_list:
             image_path = f"{self.image_dir}/{item['md5']}.jpg"
@@ -72,7 +72,7 @@ class VipProductSearchService:
                 f.write(content)
 
         return {
-            "data": csv_path,
+            "data": self.csv_path,
             "image_dir": self.image_dir,
             "count": len(image_list),
         }
@@ -89,7 +89,7 @@ class VipProductSearchService:
         return fe
 
     def extract_vip_product_features(self):
-        data = pd.read_csv(f"{VIP_ROOT}/product_images.csv")
+        data = pd.read_csv(self.csv_path)
         fe = self.__get_feature_extractor()
         for i, row in data.iterrows():
             image_path = f"{self.image_dir}/{row['md5']}.jpg"
@@ -106,7 +106,7 @@ class VipProductSearchService:
 
 
     def search_products_by_image(self, image: ImageFile, k=5):
-        data = pd.read_csv(f"{VIP_ROOT}/product_images.csv")
+        data = pd.read_csv(self.csv_path)
         product_list = data.to_dict('records')
         feature_list = []
         for product in product_list:

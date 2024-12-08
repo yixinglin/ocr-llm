@@ -19,5 +19,5 @@ async def common_scheduler_2hrs():
     await fetch_vip_product_data()
     logger.info("Common scheduler job completed")
 
-next_run_time = datetime.datetime.now() + datetime.timedelta(seconds=10)
+next_run_time = datetime.datetime.now() + datetime.timedelta(seconds=30)
 hourlyScheduler.add_job(common_scheduler_2hrs, 'date', run_date=next_run_time)

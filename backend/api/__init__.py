@@ -1,7 +1,7 @@
 from fastapi import FastAPI, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from core.config import config
-from core.db import init_db_sqlite
+from core.db import init_db_mysql
 from core.logs import logger
 from schedule import hourlyScheduler
 from .routes import v1_router
@@ -30,7 +30,7 @@ app.add_middleware(
 
 app.include_router(v1_router)
 
-init_db_sqlite(app)
+init_db_mysql(app)
 
 # T_BizProduct.create(
 #     create_by="admin",

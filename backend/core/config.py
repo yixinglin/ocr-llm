@@ -35,6 +35,18 @@ class VipServiceConfig:
     root: str
     domain: str
 
+
+@dataclass
+class HsmsVipConfig:
+    uri: str
+    port: int
+    username: str
+    password: str
+
+@dataclass
+class DatabasesConfig:
+    hsms_vip: HsmsVipConfig
+
 @dataclass
 class Config:
     debug: bool
@@ -52,12 +64,22 @@ class Config:
     file: FileConfig
     mongodb: MongoDBConfig
     vip_service: VipServiceConfig
+    databases: DatabasesConfig
 
 
 
 def load_config(config_path: str) -> Config:
     with open(config_path, 'r') as f:
         config_dict = yaml.safe_load(f)
+
+    hsms_vip_config = HsmsVipConfig(
+        **config_dict['databases']['hsms_vip']
+    )
+
+    databases_config = DatabasesConfig(
+        hsms_vip=hsms_vip_config
+    )
+
     c = Config(
         debug=config_dict['debug'],
         env=config_dict['env'],
@@ -73,7 +95,8 @@ def load_config(config_path: str) -> Config:
         logging=Logging(**config_dict['logging']),
         file=FileConfig(**config_dict['file']),
         mongodb=MongoDBConfig(**config_dict['mongodb']),
-        vip_service=VipServiceConfig(**config_dict['vip_service'])
+        vip_service=VipServiceConfig(**config_dict['vip_service']),
+        databases=databases_config
     )
 
     os.makedirs(c.logging.path, exist_ok=True)

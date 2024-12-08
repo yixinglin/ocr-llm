@@ -43,21 +43,23 @@ class MongoDBDataManager:
 
 from tortoise.contrib.fastapi import register_tortoise
 
-DB_ROOT = "db"  # root directory for database files
-DB_NAME = "hsms_vip.db"  # database filename
-SQLITE_URL = f"sqlite://./{DB_ROOT}/{DB_NAME}"
+# DB_ROOT = "db"  # root directory for database files
+# DB_NAME = "hsms_vip.db"  # database filename
+# SQLITE_URL = f"sqlite://./{DB_ROOT}/{DB_NAME}"
+hsms_vip = config.databases.hsms_vip
+MYSQL_URL = f"mysql://{hsms_vip.username}:{hsms_vip.password}@localhost:{hsms_vip.port}/hsms-vip"
 
-def init_db_sqlite(app):
+def init_db_mysql(app):
     """
-    Initialize the database with sqlite
+    Initialize the database with mysql
     :param app: FastAPI app instance
     :return:
     """
     register_tortoise(
         app,
-        db_url=SQLITE_URL,
+        db_url=MYSQL_URL,
         modules={"models": ["models"]},
-        generate_schemas=True,  # We need to generate schemas
+        generate_schemas=False,  # We need to generate schemas
         add_exception_handlers=True,
     )
 
