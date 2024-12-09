@@ -1,8 +1,11 @@
 import os
 import tempfile
 from fastapi import APIRouter, UploadFile, HTTPException, Body, Query
+from fastapi.params import Form
 from pydantic import BaseModel, Field
 import asyncio
+
+from schemas.basic import ResponseSuccess
 from services.OcrGptService import TesseractOCR_GPT_Service
 from core.config import config
 import utils.ioutils as ioutils
@@ -43,11 +46,11 @@ def extract_quote_image(base64_image: str, suffix: str,
     return result
 
 
-@ocrllm_router.post("/extract-quote-image/upload/")
+@ocrllm_router.post("/extract-quote-image/upload/", response_model=ResponseSuccess)
 def extract_quote_image_from_file_uploaded(image: UploadFile,
-        temperature: float = Query(0.7, description="Temperature for ChatGPT models. Ranges from 0.1 to 1.0."),
-        im_preprocess: bool = Query(True, description="Whether to apply image preprocessing before OCR."),
-        enable_bbox: bool = Query(False, description="Whether to enable bounding box output.")):
+        temperature: float = Form(0.7, description="Temperature for ChatGPT models. Ranges from 0.1 to 1.0."),
+        im_preprocess: bool = Form(True, description="Determines whether image preprocessing is applied before OCR."),
+        enable_bbox: bool = Form(False, description="Determines whether bounding box output is included in the response.")):
     try:
         suffix = image.filename.split(".")[-1]
         if suffix.lower() not in ["jpg", "jpeg", "png", "gif", "bmp"]:
@@ -67,11 +70,11 @@ class OCRLLM_Image(BaseModel):
     format: str = Field(default="JPG",
                         description="Image format (e.g. jpg, png, etc.)")  # image format (e.g. jpg, png, etc.)
     temperature: float = Field(0.7, description="Temperature for GPT-4 model. Ranges from 0.1 to 1.0. Default is 0.7.")
-    im_preprocess: bool = Field(True, description="Whether to apply image preprocessing before OCR. Default is True.")
-    enable_bbox: bool = Field(False, description="Whether to enable bounding box output. Default is False.")
+    im_preprocess: bool = Field(True, description="Determines whether image preprocessing is applied before OCR.")
+    enable_bbox: bool = Field(False, description="Determines whether bounding box output is included in the response.")
 
 
-@ocrllm_router.post("/extract-quote-image/base64/")
+@ocrllm_router.post("/extract-quote-image/base64/", response_model=ResponseSuccess)
 def extract_quote_image_from_base64(body: OCRLLM_Image = Body(None, description="")):
     try:
         base64_image = body.base64_image
